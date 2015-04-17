@@ -1,52 +1,53 @@
 %(1)
 %Load training data
-housing_data;
+train;
 X = fileMatrix(:,1:(end-1));
+%Add dummy
+X = [ones(size(X,1),1) X];
+%Get results
 Y = fileMatrix(:,end);
 
-%(2)
-%Number of rows
-numDataPoints = size(X,1); % = size(Y,1)
-%Introduce the dummy variable
-noDummyX = X;
-X = [ones(numDataPoints,1) X];
-transX = transpose(X);
-weight = pinv(transX*X)*transX*Y
-
-%(3)
 %Load test data
-housing_test;
-testX = testMatrix(:, 1:(end-1));
+test;
+testX = testMatrix(:,1:(end-1));
+%Add dummy
+testX = [ones(size(testX,1),1) testX];
+%Get results
 testY = testMatrix(:,end);
 
-numTestPoints = size(testX,1); % = size(testY,1)
-%Introduce the dummy variable to test set
-noDummyTestX = testX;
-testX = [ones(numTestPoints,1) testX];
+%Number of training data entries (e.g. 1400)
+numDataEntries = size(X,1);
 
-%(4)
-%Find SSE
-errorVector = (testY - testX*weight);
-sse = transpose(errorVector)*errorVector
+%Number of test data entries (e.g. 800)
+numTestEntries = size(testX, 1);
 
-%SSE without ones
-noDummyTransX = transpose(noDummyX);
-weightNoDummy = pinv(noDummyTransX*noDummyX)*noDummyTransX*Y
+%Initial weight guess of [.5 .5 ... .5]
 
-noDummyErrorVector = (testY - noDummyTestX*weightNoDummy);
-sseNoDummy = transpose(noDummyErrorVector)*noDummyErrorVector
 
-%(5)
-%Now we recompute the weight
-regValues = [.001, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 7.5, 10];
-sseVector = [];
-for lambda=regValues
-	weightWithReg = pinv(transX*X + lambda*eye(size(X,2)))*transX*Y;
-	errorVectorWithReg = (testY - testX*weightWithReg);
-	sseVector = [sseVector transpose(errorVectorWithReg)*errorVectorWithReg];
-end
-sseVector
-figure;
-plot(regValues, sseVector);
-print('regPlot', '-dpdf');
-quit
+%Sigmoid function
+sigmoid = @(w,x) (1./(1+exp(-dot(w,x))));
+sigmoidMat = @(w,X) arrayfun(@(i) sigmoid(w, X(i,:)), 1:size(X,1));
+
+%We decided on a stop threshold of 10000, arbitrarily
+stopThreshold = 10000;
+testSSE = [];
+trainSSE = [];
+%Iterate over learning rate
+for learnRate = logspace(0,10,10)
+    w = zeros(1, size(X,2)) + .5;
+    while 1 %Until convergence
+        yHat = sigmoidMat(w,X); %Get predictions
+        error = Y.' - yHat; %Get error vector
+        d = error*X; %Calculate gradient
+        w = w + learnRate .* d; %Take a step
+        if norm(d) < stopThreshold %If the step was small, stop
+            break;
+        end;
+    end;
+    % Make predictions
+    testError = testY.' - sigmoidMat(w,testX);
+    trainError = Y.' - sigmoidMat(w,X);
+    % Calculate sum of square error
+    testSSE = [testSSE sum(testError.^2)];
+    trainSSE = [trainSSE sum(trainError.^2)];
+end;
