@@ -1,8 +1,8 @@
 #Tim Dufala
 #CS434
 
-EXE:=as2
-REPORT:= Assignment2.pdf
+EXE:=as3
+REPORT:= Assignment3.pdf
 #########################
 #TARBALL VARIABLES
 #########################
@@ -10,7 +10,7 @@ REPORT:= Assignment2.pdf
 TARBALL:=${EXE}.tar.gz
 
 #List of files to put in the tarball
-FILES:=${EXE}.m iteration.png learn_rate.png regularization.png test.m train.m learn.m Makefile ${REPORT}
+FILES:=${EXE}.m Makefile ${REPORT}
 
 #########################
 #PHONY TARGETS
