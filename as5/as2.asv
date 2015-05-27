@@ -1,0 +1,12 @@
+clf
+%Load training data
+train;
+X = fileMatrix(:,1:(end-1));
+%Get results
+Y = fileMatrix(:,end);
+
+%Number of training data entries (e.g. 1400)
+numDataEntries = size(X,1);
+
+
+

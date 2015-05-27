@@ -5,23 +5,32 @@ function main = knn()
     knnTest;
 
     %Set up X and Y matrices for training data
-    X = [ones(size(knnTrainMatrix,1), 1) knnTrainMatrix(:,2:end)];
+    X = knnTrainMatrix(:,2:end);
     Y = knnTrainMatrix(:,1);
 
     %Set up X and Y matrices for testing data
-    testX = [ones(size(knnTestMatrix,1), 1) knnTestMatrix(:,2:end)];
+    testX = knnTestMatrix(:,2:end);
     testY = knnTestMatrix(:,1);
-    size(testY)
-    predictsTest = [];
-    predictsXValidate = [];
-    predictsTrain = [];
-    for k = 1:2:15
-        predictsTest = [predictsTest predictKNN(X,testX,Y,k)];
-        %predictsTrain =  [predictsTrain ...];
-        predictsXValidate = [predictsXValidate xValidate(X, Y, k)];
+%     size(testY)
+    errorTest = [];
+    errorXValidate = [];
+    errorTrain = [];
+    ks = 1:2:15;
+    for k = ks
+        errorTrain =  [errorTrain findAvgError(X, Y, X, Y, k)];
+        errorTest = [errorTest findAvgError(X, Y, testX, testY, k) ];
+        errorXValidate = [errorXValidate xValidate(X, Y, k)];
     end
-    predictsXValidate
     
+    [minTestError, I] = min(errorTest);
+    testK = ks(I);
+    [minXValidateError, I] = min(errorXValidate);
+    xValidateK = ks(I);
+    
+    fprintf('Best k for Test: %d \t Error = %f\n', testK, minTestError);
+    fprintf('Best k for Cross Validation: %d \t Error = %f\n', xValidateK, minXValidateError);
+    
+    main = makePlot(errorTrain, errorTest, errorXValidate, ks);
 end
 
 %Gives distances as a matrix of size (length(X), length(testX)
@@ -30,7 +39,7 @@ end
 % e.g. sum(distances(i,:))/n is the average distance between test example i
 % and all of the examples in X
 function distances = distance(X, testX)
-    distances = zeros(length(testX), length(X));
+    distances = zeros(size(testX, 1), size(X, 1));
     for i = 1:size(testX,1)
         for j = 1:size(X,1)
             distances(i,j) = norm(testX(i,:) - X(j,:));
@@ -50,8 +59,9 @@ end
 
 function avgError = findAvgError(X, Y, testX, testY, k)
     predicts = predictKNN(X, testX, Y, k);
-    avgError = ((testY - predicts)./2).^2;
-    avgError = sum(((testY - predicts)/2).^2)/(size(testY,1));
+    errors = ((testY - predicts)./2).^2;
+%     fprintf('X: %d \t Y: %d testX: %d \t testY: %d\n', size(X, 1), size(Y, 1), size(testX, 1), size(testY, 1));
+    avgError = mean(errors);
 end
 
 function error = xValidate(X, Y, k)
@@ -63,8 +73,23 @@ function error = xValidate(X, Y, k)
         trainX(i,:) = [];
         trainY = Y;
         trainY(i,:) = [];
-        size(validX)
-        %errorSum = errorSum + findAvgError(trainX, trainY, validX, validY, k);
+%         size(trainX)
+        errorSum = errorSum + findAvgError(trainX, trainY, validX, validY, k);
     end
     error = errorSum / size(X,1);
+end
+
+function ret = makePlot(errorTrain, errorTest, errorXValidate, ks)
+    hold on
+    plot(ks, errorTrain)
+    plot(ks, errorTest)
+    plot(ks, errorXValidate)
+    
+    title('Average Error vs. k')
+    xlabel('k')
+    ylabel('Average Error')
+    legend('Training Error', 'Testing Error', 'Cross Validation Error')
+%     legend('Training Error', 'Testing Error')
+    
+    ret = 0;
 end
