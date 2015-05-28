@@ -10,13 +10,34 @@ function main = as5()
 
     %Number of training data entries (e.g. 1400)
     numDataEntries = size(X,1);
-    
-    labels = kmeans(X, 8)
-    
+    for k = [2 4 6 8]
+        [best_centers, best_labels] = kmeans(X, k);
+        best_sse = getSSE(X, best_centers, best_labels);
+        for i = 1:(10 - 1)
+            [centers, labels] = kmeans(X, k);
+            sse = getSSE(X, best_centers, best_labels);
+            if (sse < best_sse)
+                best_sse = sse;
+                best_centers = centers;
+                best_labels = labels;
+            end
+        end
+        best_labels
+        best_centers
+        best_sse
+    end
     main = 0;
 end
 
-function labels = kmeans(X, k)
+function sse = getSSE(X, centers, labels)
+    sse = 0;
+    for i = 1:size(X, 1)
+        d = distance(X(i, :), centers(labels(i), :));
+        sse = sse + (d ^ 2);
+    end
+end
+
+function [centers, labels] = kmeans(X, k)
     n = size(X,1);
     d = size(X, 2);
     centers = X(randperm(n, k), :);
