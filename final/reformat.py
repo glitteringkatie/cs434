@@ -16,10 +16,9 @@ def main():
 	classlabel = sys.argv[2]
 	lyrics = get_lyrics(folder,classlabel)
 	for song,label in lyrics:
-		sys.stdout.write('(' + song + ')')
+		sys.stdout.write('(' + song + ',' + classlabel + ')')
 
 if __name__ == '__main__':
-	print get_lyrics('country_songs')
-	#main()
+	main()
 
 
