@@ -18,17 +18,7 @@ def main():
 	for song,label in lyrics:
 		sys.stdout.write('(' + song + ',' + classlabel + ')')
 
-<<<<<<< HEAD
-
-
-=======
 if __name__ == '__main__':
-<<<<<<< HEAD
 	main()
-=======
-	print get_lyrics('country_songs')
-	#main()
->>>>>>> f3b4ec5ce3ce333cff72f361c6d36a9b387db56c
->>>>>>> 9f0e192c3808f8ab1fdb94165300777a3c69dc6a
 
 
