@@ -1,6 +1,16 @@
 # reformat lyrics as list
 import os
 import sys
+
+def get_all_lyrics(folder):
+	country = get_lyrics(folder + '/country_songs')
+	rap = get_lyrics(folder + '/rap_songs')
+	lyrics = country + rap
+	labels = ["country" for i in country] + ["rap" for i in rap]
+
+	return lyrics, labels
+
+
 def get_lyrics(folder, classlabel=None):
 	songs = []
 	for title in os.listdir(folder):
@@ -11,6 +21,7 @@ def get_lyrics(folder, classlabel=None):
 				songs.append(songfile.read())
 
 	return songs
+
 def main():
 	folder = sys.argv[1]
 	classlabel = sys.argv[2]
