@@ -10,8 +10,7 @@ def get_lyrics(folder):
 
 	return songs
 
-folder = 'country_songs/'
-print get_lyrics(folder)
+
 
 
 
